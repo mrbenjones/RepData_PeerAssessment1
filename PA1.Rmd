@@ -8,9 +8,13 @@ output:
 
 ## Loading and preprocessing the data
 
+This step is completely straightforward.  I unzip the existing file in the archive (no need to check in the csv),
+and read the frame, which already has column headers. 
 ```{r}
+unzip("activity.zip")
 activityData<-read.csv("activity.csv")
 dim(activityData)
+head(activityData,n=1)
 library(plyr)
 library(ggplot2)
 ```
@@ -19,15 +23,15 @@ library(ggplot2)
 
 ```{r}
 totals<-ddply(activityData,.(date),summarise,steps=sum(steps,na.rm=F))
-meanSteps<-mean(totals$steps)
+meanSteps<-mean(totals$steps,na.rm=T)
 meanSteps
 ```
 
 ## What is the average daily activity pattern?
 
 ```{r}
-intervalTotals<-ddply(activityData,.(interval),steps=sum(steps,na.rm=F))
-q<-ggplot(data=intervalTotals,aes(x=date,y=steps))+geom_point(size=2)
+intervalTotals<-ddply(activityData,.(date),steps=mean(steps,na.rm=F))
+q<-ggplot(data=intervalTotals,aes(x=interval,y=steps))+geom_line()
 q
 ```
 
