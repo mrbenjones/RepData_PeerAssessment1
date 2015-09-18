@@ -1,0 +1,39 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+
+```{r}
+activityData<-read.csv("activity.csv")
+dim(activityData)
+library(plyr)
+library(ggplot2)
+```
+
+## What is mean total number of steps taken per day?
+
+```{r}
+totals<-ddply(activityData,.(date),summarise,steps=sum(steps,na.rm=F))
+meanSteps<-mean(totals$steps)
+meanSteps
+```
+
+## What is the average daily activity pattern?
+
+```{r}
+intervalTotals<-ddply(activityData,.(interval),steps=sum(steps,na.rm=F))
+q<-ggplot(data=intervalTotals,aes(x=date,y=steps))+geom_point(size=2)
+q
+```
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
