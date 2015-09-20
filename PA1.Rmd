@@ -1,8 +1,9 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
+title: 'Reproducible Research: Peer Assessment 1'
+output:
   html_document:
-    keep_md: true
+    keep_md: yes
+  pdf_document: default
 ---
 
 
@@ -29,15 +30,41 @@ meanSteps
 
 ## What is the average daily activity pattern?
 
+We collect the mean number steps by interval over all dates given (removing the NA row/column combos),
+and we get:
+
 ```{r}
-intervalTotals<-ddply(activityData,.(date),steps=mean(steps,na.rm=F))
-q<-ggplot(data=intervalTotals,aes(x=interval,y=steps))+geom_line()
+intervalTotals<-ddply(activityData,c("interval"),.fun=function(x) mean(x$steps,na.rm=T))
+dim(intervalTotals)
+head(intervalTotals)
+q<-ggplot(data=intervalTotals,aes(x=interval,y=V1))+geom_line()
 q
 ```
 
+Almost no steps are taken in the intervals from 0 to 500, and the number of steps peaks at around interval 800.
 
-## Imputing missing values
+## Imputing missing values  using mean for day and interval
 
+
+```{r}
+imputeRow<-function(date,interval){
+  mean(activityData$steps[activityData$interval==interval&activityData$date==date],na.rm = T)
+}
+
+activityDataFilled<-transform(activityData,steps=ifelse(is.na(steps),imputeRow(date,interval),steps))
+
+head(activityDataFilled)
+
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+activityDataFilled<-transform(activityDataFilled,weekday=weekdays(as.Date(date)))
+weekdaySummary<-ddply(activityDataFilled,.(weekday),total=mean(steps))
+q<-ggplot(data=activityDataFilled,aes(x=weekday,y=steps))+geom_point()
+q
+```
+
+The averages are the same, but activity seems more bi-modal on weekends, with many people taking fewer steps and a few taking far more steps, and few in between. 
